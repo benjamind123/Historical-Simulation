@@ -88,13 +88,11 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   Hist <- ggplot(aes(x = Change), data = portfolio_change) + geom_histogram(color = "black", fill = "green3")
   Hist <- Hist + labs(x = "Portfolio Change", y = "Frequency") + ggtitle("Histogram of Portfolio Changes") + theme_bw()
   
-  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "£", -round(VaR, 2), sep = ""), Hist)
+  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "Â£", -round(VaR, 2), sep = ""), Hist)
   
   names(V) <- c("VaR", "Histogram")  
   return(V)
 }   
 
 
-a <- HistSim(1, 0.03, 252, 0.05, 34, 0.01)
-a$VaR
-plot(a)
+
