@@ -26,7 +26,7 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   returns <- c()
   
   for (i in 2:length(price)){
-    
+     
     returns[[i]] <- log(price[i] / price[i - 1])
     
   }
@@ -79,6 +79,22 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   
   VaR <- ordered_portfolio_change[round(alpha * length(portfolio_change), 0)]
   
-  paste("The ", (1 - alpha) * 100, "% VaR is ", "£", -round(VaR, 2), sep = "")
+  library(ggplot2)
+  
+  # Histogram of the returns
+  
+  portfolio_change <- data.frame(Change = portfolio_change)
+  
+  Hist <- ggplot(aes(x = Change), data = portfolio_change) + geom_histogram(color = "black", fill = "green3")
+  Hist <- Hist + labs(x = "Portfolio Change", y = "Frequency") + ggtitle("Histogram of Portfolio Changes") + theme_bw()
+  
+  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "£", -round(VaR, 2), sep = ""), Hist)
+  
+  names(V) <- c("VaR", "Histogram")  
+  return(V)
 }   
 
+
+a <- HistSim(1, 0.03, 252, 0.05, 34, 0.01)
+a$VaR
+plot(a)
