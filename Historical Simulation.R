@@ -37,7 +37,7 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   
   # Simulating the share price
   
-  simulated <- c(rep(0, length(price)))
+  simulated <- c(rep(0, length(price))) 
   simulated[1] <- price[1] * exp(returns[1])
   
   for (i in 2:length(price)){
