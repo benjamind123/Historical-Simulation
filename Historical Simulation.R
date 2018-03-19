@@ -15,13 +15,31 @@
 # is the strike for the option. alpha is the level (1 - alpha) 
 # at which we want to calculate the VaR for.
 
-HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price, alpha){
+HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price, alpha, today = 0){
+  
+  # Validity checks for function parameters
+  
+  if (alpha > 1 | alpha < 0){
+    stop("alpha is not between 0 and 1.")
+  }
+  
+  if (maturity < 0){
+    stop("Maturity cannot be negative.") 
+  }
+  
+  if (volatility < 0){
+    stop("Volatility cannot be negative.")
+  }
+  
+  if (maturity <= today){
+    stop("Maturity date must be greater than today's date.")
+  }
   
   # Generate some financial data
   
   price <- c(rnorm(hist_data, 45, 3)) 
    
-  # Compute the daily log returns. 
+  # Compute the daily log returns.    
   
   returns <- c()
   
@@ -37,7 +55,7 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   
   # Simulating the share price
   
-  simulated <- c(rep(0, length(price))) 
+  simulated <- c(rep(0, length(price)))
   simulated[1] <- price[1] * exp(returns[1])
   
   for (i in 2:length(price)){
@@ -50,10 +68,10 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   # PDE. We first need to calculate d1 and d2. We will assume we
   # are computing the option price at time t = 0. 
   
-  d1 <- (log(price/strike_price) + (interest_rate - volatility ^ 2 / 2) * maturity) / sqrt(maturity) * volatility
-  d2 <- d1 - sqrt(maturity) * volatility
+  d1 <- (log(price/strike_price) + (interest_rate - volatility ^ 2 / 2) * (maturity - today)) / sqrt(maturity - today) * volatility
+  d2 <- d1 - sqrt(maturity - today) * volatility
   
-  call_value <- price * pnorm(d1) - strike_price * exp(-interest_rate * maturity) * pnorm(d2)  
+  call_value <- price * pnorm(d1) - strike_price * exp(-interest_rate * (maturity - today)) * pnorm(d2)  
   
   # Suppose our portfolio consists of 100 call options. Then we can compute the
   # portfolio value
@@ -71,7 +89,7 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
     
   }
   
-  portfolio_change <- na.omit(portfolio_change)
+  portfolio_change <- na.omit(portfolio_change)    
   
   # Ordering the changes in portfolio before taking (1-alpha)% quantile
   
@@ -83,16 +101,23 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   
   # Histogram of the returns
   
+  Days <- round((maturity - today) * 252) 
+  
   portfolio_change <- data.frame(Change = portfolio_change)
   
   Hist <- ggplot(aes(x = Change), data = portfolio_change) + geom_histogram(color = "black", fill = "green3")
-  Hist <- Hist + labs(x = "Portfolio Change", y = "Frequency") + ggtitle("Histogram of Portfolio Changes") + theme_bw()
+  Hist <- Hist + labs(x = "Portfolio Change", y = "Frequency") + ggtitle(paste("Histogram of Portfolio Changes across", Days, "days"), 
+                                                                               subtitle = paste( "with", (1 - alpha) * 100, "% probability")) 
+  Hist <- Hist + geom_vline(xintercept = VaR, linetype = "dashed", color = "red3",size = 1) + theme_bw()
   
-  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "Â£", -round(VaR, 2), sep = ""), Hist)
+  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "£", -round(VaR, 2), sep = ""), Hist)
   
-  names(V) <- c("VaR", "Histogram")  
+  names(V) <- c("VaR", "Histogram")
   return(V)
-}   
+}     
 
-
-
+ 
+a <- HistSim(0.12, 0.03, 252, 0.05, 34, 0.05) 
+a$VaR
+a$Histogram
+ 
