@@ -5,5 +5,5 @@ currently performs a VaR estimation for a portfolio of European call options.
 
 ![](hist.png)
 
-Example of part of the output. A histogram showing the portfolio of call options distribution
+Example of part of the output. A histogram showing the call options portfolio's distribution
 of changes over the given time period.
