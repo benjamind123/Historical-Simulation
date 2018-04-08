@@ -60,7 +60,7 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
   
   for (i in 2:length(price)){
   
-    simulated[[i]] <- price[i - 1] * exp(returns[i])
+    simulated[[i]] <- simulated[i - 1] * exp(returns[i])
     
   }
   
@@ -110,7 +110,7 @@ HistSim <- function(maturity, interest_rate, hist_data, volatility, strike_price
                                                                                subtitle = paste( "with", (1 - alpha) * 100, "% probability")) 
   Hist <- Hist + geom_vline(xintercept = VaR, linetype = "dashed", color = "red3",size = 1) + theme_bw()
   
-  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "£", -round(VaR, 2), sep = ""), Hist)
+  V <- list(paste("The ", (1 - alpha) * 100, "% VaR is ", "Â£", -round(VaR, 2), sep = ""), Hist)
   
   names(V) <- c("VaR", "Histogram")
   return(V)
